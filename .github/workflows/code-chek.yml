@@ -11,31 +11,29 @@ concurrency:
 
 jobs:
   lint:
-    name: ⬣ ESLint, ʦ TypeScript, 💅 Prettier, and 🃏 Test
+    name: 🛠️ Code Quality Checks
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout repo
+      - name: 🔄 Checkout Repository
         uses: actions/checkout@v2
 
-      - name: 🤌 Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+      - name: 📦 Install PNPM
+        run: npm install -g pnpm
 
-      - name: ⎔ Setup node
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'pnpm'
 
-      - name: 📥 Download deps
+      - name: 📥 Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔬 Lint
+      - name: ✅ Lint Code
         run: pnpm run lint:strict
 
-      - name: 🔎 Type check
+      - name: 🔍 Type Check
         run: pnpm run typecheck
 
-      - name: 💅 Prettier check
+      - name: ✨ Prettier Check
         run: pnpm run format:check
