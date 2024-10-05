@@ -19,13 +19,12 @@ const pwaConfig = {
         cacheName: 'google-fonts-webfonts',
         expiration: {
           maxEntries: 4,
-          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+          maxAgeSeconds: 60 * 60 * 24 * 365,
         },
       },
     },
   ],
-  disable: process.env.NODE_ENV === 'development', // Disable PWA in development mode
+  disable: process.env.NODE_ENV === 'development',
 };
-
 
 export default withPWA(pwaConfig);
