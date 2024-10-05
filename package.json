@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "eslint --fix && pnpm format",
+    "lint:strict": "eslint --max-warnings=0 src",
     "format": "prettier -w .",
+    "typecheck": "tsc --noEmit --incremental false",
     "prepare": "husky"
   },
   "dependencies": {
