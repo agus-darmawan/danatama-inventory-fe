@@ -1,8 +1,6 @@
 import axios from '@/lib/axios';
 import { deleteCookie, setCookie } from '@/lib/cookie';
-
 import { useStore } from '@/store';
-
 import { IForgotPassword, ILogin, IRegister } from '@/types/auth';
 
 export const useAuth = () => {
@@ -27,7 +25,6 @@ export const useAuth = () => {
     try {
       const { data } = await axios.post('/auth/login', params);
       setCookie('auth.__token', data.data);
-      console.log('Login response:', data);
       await fetchUser();
     } catch (e) {
       throw e;
@@ -60,6 +57,7 @@ export const useAuth = () => {
 
   return {
     loggedIn: !!useStore.getState().auth,
+    user: useStore.getState().auth?.user,
     fetchUser,
     login,
     register,

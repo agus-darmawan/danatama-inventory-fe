@@ -1,7 +1,6 @@
 'use client';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
@@ -9,9 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 import { Button } from '@/components/ui/button';
 import {
-  Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -24,7 +21,6 @@ import { IRegister } from '@/types/auth';
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
   const { register: signup } = useAuth();
 
   const {
@@ -43,94 +39,99 @@ export default function SignupPage() {
   const handleForm: SubmitHandler<IRegister> = async (data) => {
     try {
       await signup(data);
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-wrap flex-col items-center justify-center">
-      <Card className="w-[300px] sm:w-[350px]">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">Signup</CardTitle>
-          <CardDescription>
-            Enter your username, email, and password to sign up
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(handleForm)}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
+    <div className="h-full w-full">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center">Signup</CardTitle>
+      </CardHeader>
+      <form onSubmit={handleSubmit(handleForm)}>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              type="text"
+              placeholder="username"
+              {...register('username')}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              placeholder="contoh@gmail.com"
+              {...register('email')}
+            />
+          </div>
+          <div className="grid gap-2 relative">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
               <Input
-                type="text"
-                placeholder="username"
-                {...register('username')}
+                id="password"
+                placeholder="•••••••••••••••"
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                placeholder="m@example.com"
-                {...register('email')}
-              />
-            </div>
-            <div className="grid gap-2 relative">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password')}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2" // Center vertically
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </Button>
-              </div>
-            </div>
-            <div className="grid gap-2 relative">
-              <Label htmlFor="password_confirmation">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="password_confirmation"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  {...register('password_confirmation')}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2" // Center vertically
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                >
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <Button className="w-full" disabled={isSubmitting} type="submit">
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                'Signup'
-              )}
-            </Button>
-            <Link className="w-full" href="/login">
-              <Button className="w-full" variant="outline">
-                Visit Login Page
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2  text-gray-500"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
               </Button>
+            </div>
+          </div>
+          <div className="grid gap-2 relative">
+            <Label htmlFor="password_confirmation">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="password_confirmation"
+                placeholder="•••••••••••••••"
+                type={showConfirmPassword ? 'text' : 'password'}
+                {...register('password_confirmation')}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2  text-gray-500"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+              >
+                {showConfirmPassword ? <EyeOff /> : <Eye />}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-3 mb-10 items-start">
+          <Button
+            className="w-full rounded-full"
+            disabled={isSubmitting}
+            type="submit"
+          >
+            {isSubmitting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              'Signup'
+            )}
+          </Button>
+          <div className="flex text-center text-sm gap-2">
+            <h3>Sudah punya akun </h3>
+            <Link
+              className="text-blue-500 hover:underline hover:text-blue-300"
+              href="/login"
+            >
+              Login
             </Link>
-          </CardFooter>
-        </form>
-      </Card>
+          </div>
+        </CardFooter>
+      </form>
     </div>
   );
 }

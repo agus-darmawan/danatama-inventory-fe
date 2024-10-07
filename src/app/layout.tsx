@@ -31,8 +31,8 @@ export default async function RootLayout({
   const { fetchUser } = useAuth();
   const user = await fetchUser();
   return (
-    <html lang="en" className={` bg-primary ${poppins.className}`}>
-      <body className="antialiased bg-primary">
+    <html lang="en" className={` bg-blue-900 ${poppins.className}`}>
+      <body className="max-w-md mx-auto bg-neutral-900 min-h-screen">
         <StoreInitializer auth={user} />
         {children}
         <Toaster />

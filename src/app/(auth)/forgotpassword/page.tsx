@@ -3,6 +3,7 @@
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import Link from 'next/link';
 
 import { useAuth } from '@/hooks/use-auth';
 
@@ -44,36 +45,47 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center py-4 min-h-screen">
-      <Card className="w-[300px] sm:w-[350px]">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">Password Reset</CardTitle>
-          <CardDescription>
-            Enter your email to reset the password
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(handleForm)}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                placeholder="m@example.com"
-                {...register('email', { required: true })}
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button disabled={isSubmitting} type="submit">
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                'Submit'
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="w-full h-full">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center">Password Reset</CardTitle>
+        <CardDescription>
+          Masukan email anda untuk mereset password
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit(handleForm)}>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              placeholder="m@example.com"
+              {...register('email', { required: true })}
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4 justify-between items-start">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full rounded-full"
+          >
+            {isSubmitting ? (
+              <Loader2 className="mr-2 h-4 animate-spin" />
+            ) : (
+              'Login'
+            )}
+          </Button>
+          <div className="flex text-center text-sm gap-2">
+            <h3>Kembali ke </h3>
+            <Link
+              className="text-blue-500 hover:underline hover:text-blue-300"
+              href="/login"
+            >
+              login
+            </Link>
+          </div>
+        </CardFooter>
+      </form>
     </div>
   );
 }
