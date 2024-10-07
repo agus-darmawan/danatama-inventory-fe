@@ -1,9 +1,13 @@
 'use client';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { env } from '@/lib/env';
-import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { useAuth } from '@/hooks/use-auth';
+
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -12,46 +16,35 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+
+import { ILogin } from '@/types/auth';
 
 export default function LoginPage() {
-  const { toast } = useToast();
-  const [user, setUser] = useState({
-    email: '',
-    password: '',
+  const router = useRouter();
+  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<ILogin>({
+    defaultValues: {
+      emailOrUsername: '',
+      password: '',
+    },
   });
-  const [loading, setLoading] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const onLogin = async () => {
+  const handleForm: SubmitHandler<ILogin> = async (data) => {
     try {
-      setLoading(true);
-      await axios.post(env.NEXT_PUBLIC_API_URL + '/auth/login', user);
-      toast({
-        variant: 'default',
-        title: 'Login Berhasil',
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Login Gagal',
-        description: 'Username atau password yang anda masukkan salah',
-      });
-    } finally {
-      setLoading(false);
+      await login(data);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error(error);
     }
   };
-
-  if (!isMounted) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen flex flex-wrap flex-col items-center justify-center">
@@ -62,50 +55,54 @@ export default function LoginPage() {
             Enter your email and password to login
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={user.email}
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
-            />
-            <Link
-              className="text-right text-xs text-slate-500 hover:underline hover:text-slate-300"
-              href="/forgotpassword"
-            >
-              Forgot Password
+        <form onSubmit={handleSubmit(handleForm)}>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="emailOrUsername">Email or Username</Label>
+              <Input
+                id="emailOrUsername"
+                type="text"
+                placeholder="m@example.com"
+                {...register('emailOrUsername', { required: true })}
+              />
+              <Link
+                className="text-right text-xs text-slate-500 hover:underline hover:text-slate-300"
+                href="/forgotpassword"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <div className="grid gap-2 relative">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password', { required: true })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Login'
+              )}
+            </Button>
+            <Link href="/signup">
+              <Button variant="outline">Signup</Button>
             </Link>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={user.password}
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button
-            disabled={
-              user.email.length > 0 && user.password.length > 0 ? false : true
-            }
-            onClick={onLogin}
-          >
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              'Login'
-            )}
-          </Button>
-          <Link href="/signup">
-            <Button variant="outline">Signup</Button>
-          </Link>
-        </CardFooter>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

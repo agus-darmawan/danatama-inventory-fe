@@ -1,9 +1,13 @@
 'use client';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { useToast } from '@/hooks/use-toast'; // Custom toast hook import
+import React, { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { useAuth } from '@/hooks/use-auth';
+
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -12,43 +16,36 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+
+import { IRegister } from '@/types/auth';
 
 export default function SignupPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
-  const { toast } = useToast(); // Using the custom toast hook
+  const { register: signup } = useAuth();
 
-  const [user, setUser] = useState({
-    email: '',
-    password: '',
-    username: '',
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IRegister>({
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+    },
   });
 
-  const [loading, setLoading] = useState(false);
-
-  const onSignup = async () => {
+  const handleForm: SubmitHandler<IRegister> = async (data) => {
     try {
-      setLoading(true);
-      await axios.post('/api/users/signup', user);
-      toast({
-        variant: 'default',
-        title: 'Signup Successful',
-        description:
-          'Please check your inbox and click on the verification link.',
-        duration: 10000,
-      });
-      router.push('/login');
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Signup Failed',
-        description: error.message || 'An error occurred during signup.',
-      });
-    } finally {
-      setLoading(false);
+      await signup(data);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -61,61 +58,78 @@ export default function SignupPage() {
             Enter your username, email, and password to sign up
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="username"
-              value={user.username}
-              onChange={(e) => setUser({ ...user, username: e.target.value })}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={user.email}
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={user.password}
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button
-            className="w-full"
-            disabled={
-              user.username.length > 0 &&
-              user.email.length > 0 &&
-              user.password.length > 0
-                ? false
-                : true
-            }
-            onClick={onSignup}
-          >
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              'Signup'
-            )}
-          </Button>
-          <Link className="w-full" href="/login">
-            <Button className="w-full" variant="outline">
-              Visit Login Page
+        <form onSubmit={handleSubmit(handleForm)}>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                type="text"
+                placeholder="username"
+                {...register('username')}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                placeholder="m@example.com"
+                {...register('email')}
+              />
+            </div>
+            <div className="grid gap-2 relative">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password')}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2" // Center vertically
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-2 relative">
+              <Label htmlFor="password_confirmation">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="password_confirmation"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  {...register('password_confirmation')}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2" // Center vertically
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                >
+                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-2">
+            <Button className="w-full" disabled={isSubmitting} type="submit">
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Signup'
+              )}
             </Button>
-          </Link>
-        </CardFooter>
+            <Link className="w-full" href="/login">
+              <Button className="w-full" variant="outline">
+                Visit Login Page
+              </Button>
+            </Link>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );

@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import axios from 'axios';
-import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { useAuth } from '@/hooks/use-auth';
+
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,36 +15,31 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+
+import { IForgotPassword } from '@/types/auth';
 
 export default function ForgotPasswordPage() {
-  const { toast } = useToast(); // Using custom toast
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { forgotPassword } = useAuth();
 
-  const verifyEmail = async () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<IForgotPassword>({
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const handleForm: SubmitHandler<IForgotPassword> = async (data) => {
     try {
-      setLoading(true);
-      await axios.post('/api/users/forgotpassword', { email });
-      toast({
-        variant: 'default',
-        title: 'User Found',
-        description:
-          'Please check your inbox and click on the verification link.',
-        duration: 10000, // Duration for 10 seconds
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Something went wrong, please try again.',
-      });
-    } finally {
-      setLoading(false);
-      setEmail('');
+      await forgotPassword(data);
+      router.push('/login');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -53,27 +52,27 @@ export default function ForgotPasswordPage() {
             Enter your email to reset the password
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button disabled={email.length === 0} onClick={verifyEmail}>
-            {loading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              'Submit'
-            )}
-          </Button>
-        </CardFooter>
+        <form onSubmit={handleSubmit(handleForm)}>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                placeholder="m@example.com"
+                {...register('email', { required: true })}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button disabled={isSubmitting} type="submit">
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Submit'
+              )}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );
